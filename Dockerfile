@@ -20,6 +20,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         mbstring \
         exif \
         calendar \
+    && a2dismod mpm_event mpm_worker 2>/dev/null || true \
+    && a2enmod mpm_prefork \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
