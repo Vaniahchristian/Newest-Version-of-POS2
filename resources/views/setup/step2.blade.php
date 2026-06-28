@@ -36,7 +36,7 @@
                 <span class="tip" title="The name of your database">
                     <i class="fa fa-question-circle" aria-hidden="true"></i>
                 </span>
-            <input type="text" class="form-control" id="db_database" name="db_database" placeholder="Database Name" required="">
+            <input type="text" class="form-control" id="db_database" name="db_database" placeholder="Database Name" required="" value="{{$data["DB_DATABASE"]}}">
             <label for="app_name" class="mt-1" id="db_username_label">DB Username</label> 
                 <span class="tip" id="db3tooltip" title="The username for your database connection">
                     <i class="fa fa-question-circle" aria-hidden="true"></i>

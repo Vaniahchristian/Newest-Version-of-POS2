@@ -8,6 +8,10 @@ cd /var/www/html
 
 php artisan storage:link --force 2>/dev/null || true
 
+if [ -n "${DB_DATABASE:-}" ] && [ ! -f storage/app/public/installed ]; then
+  touch storage/app/public/installed
+fi
+
 if [ ! -f storage/oauth-private.key ]; then
   php artisan passport:keys --force
 fi
