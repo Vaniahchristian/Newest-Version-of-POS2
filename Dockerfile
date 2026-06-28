@@ -31,7 +31,7 @@ RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-av
 WORKDIR /var/www/html
 
 COPY composer.json composer.lock ./
-RUN composer install --no-dev --no-interaction --no-scripts --ignore-platform-reqs
+RUN composer install --no-dev --no-interaction --no-scripts --no-autoloader --ignore-platform-reqs
 
 COPY . .
 
