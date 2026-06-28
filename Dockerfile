@@ -20,7 +20,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         mbstring \
         exif \
         calendar \
-    && a2dismod mpm_event mpm_worker 2>/dev/null || true \
+    && rm -f /etc/apache2/mods-enabled/mpm_*.load /etc/apache2/mods-enabled/mpm_*.conf \
     && a2enmod mpm_prefork \
     && rm -rf /var/lib/apt/lists/*
 
@@ -47,6 +47,11 @@ RUN mkdir -p storage/framework/{cache/data,sessions,views,testing} storage/logs 
 
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
+
+# Re-assert single MPM after all image layers (apt can leave duplicate symlinks)
+RUN rm -f /etc/apache2/mods-enabled/mpm_*.load /etc/apache2/mods-enabled/mpm_*.conf \
+    && a2enmod mpm_prefork \
+    && apache2ctl configtest
 
 EXPOSE 8080
 
