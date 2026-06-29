@@ -46,7 +46,6 @@ export function pieChartOptions({ title, data, formatter }) {
         center: ["50%", "46%"],
         avoidLabelOverlap: true,
         itemStyle: {
-          borderRadius: 6,
           borderColor: "#fff",
           borderWidth: 2,
         },
@@ -90,7 +89,6 @@ export function barChartOptions({ categories, series, horizontal = false }) {
       type: "bar",
       barMaxWidth: 36,
       itemStyle: {
-        borderRadius: horizontal ? [0, 6, 6, 0] : [6, 6, 0, 0],
         color: s.color || [CHART_COLORS.blue, CHART_COLORS.green, CHART_COLORS.yellow][i % 3],
       },
     })),

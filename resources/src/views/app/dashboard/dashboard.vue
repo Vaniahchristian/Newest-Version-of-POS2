@@ -230,6 +230,7 @@ import {
   CHART_COLORS,
   pieChartOptions,
   barChartOptions,
+  lineChartOptions,
 } from "../../../utils/chartTheme";
 
 import ECharts from "vue-echarts/components/ECharts.vue";
@@ -418,6 +419,7 @@ export default {
         .get(
           "/dashboard_data?warehouse_id=" + this.warehouse_id)
         .then(response => {
+          try {
           const responseData = response.data;
 
           this.report_today = response.data.report_dashboard.original.report;
@@ -428,9 +430,9 @@ export default {
           this.sales = response.data.report_dashboard.original.last_sales;
           this.echartCustomer = pieChartOptions({
             title: "Top Customers",
-            data: responseData.customers.original,
+            data: responseData.customers.original || [],
             formatter: params =>
-              `${params.name}: (${params.data.value} sales) (${params.percent}%)`,
+              `${params.name}: (${params.value} sales) (${params.percent}%)`,
           });
 
           this.echartPayment = lineChartOptions({
@@ -449,7 +451,7 @@ export default {
 
           this.echartProduct = pieChartOptions({
             title: "Top Selling Products",
-            data: responseData.product_report.original,
+            data: responseData.product_report.original || [],
             formatter: params => `${params.name}: (${params.value} sales)`,
           });
 
@@ -468,9 +470,14 @@ export default {
               },
             ],
           });
+          } catch (e) {
+            console.error("Dashboard chart error:", e);
+          }
           this.loading = false;
         })
-        .catch(response => {});
+        .catch(() => {
+          this.loading = false;
+        });
     },
 
     //------------------------------Get Month -------------------------\\
