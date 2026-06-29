@@ -1,14 +1,3 @@
-FROM node:16-bullseye AS frontend
-
-WORKDIR /app
-
-COPY package.json webpack.mix.js ./
-COPY resources ./resources
-
-RUN mkdir -p public/js public/css \
-    && npm install --legacy-peer-deps \
-    && NODE_OPTIONS=--max_old_space_size=4096 npm run production
-
 FROM php:8.0-apache-bullseye
 
 RUN a2enmod rewrite headers
@@ -47,9 +36,6 @@ COPY composer.json composer.lock ./
 RUN composer install --no-dev --no-interaction --no-scripts --no-autoloader --ignore-platform-reqs
 
 COPY . .
-
-COPY --from=frontend /app/public/js ./public/js
-COPY --from=frontend /app/public/mix-manifest.json ./public/mix-manifest.json
 
 RUN composer dump-autoload --optimize
 
