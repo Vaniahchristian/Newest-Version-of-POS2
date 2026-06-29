@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <link rel=icon href=/images/favicon.ico>
     <link rel="stylesheet" href="/css/master.css">
+    <link rel="stylesheet" href="/css/stocky-theme.css">
 
     <title>Stocky | Ultimate Inventory With POS</title>
   </head>

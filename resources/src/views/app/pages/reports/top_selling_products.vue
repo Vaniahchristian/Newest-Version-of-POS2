@@ -16,6 +16,22 @@
         </date-range-picker>
       </b-col>
 
+    <b-row v-if="!isLoading" class="mt-3">
+      <b-col lg="7" md="12">
+        <report-chart-panel
+          :title="$t('Top_Selling_Products')"
+          :subtitle="$t('TotalAmount')"
+          :options="echartProductsBar"
+        />
+      </b-col>
+      <b-col lg="5" md="12">
+        <report-chart-panel
+          :title="$t('Top_Selling_Products')"
+          :options="echartProductsPie"
+        />
+      </b-col>
+    </b-row>
+
       <vue-good-table
         v-if="!isLoading"
         mode="remote"
@@ -68,20 +84,23 @@
 import NProgress from "nprogress";
 import { mapGetters } from "vuex";
 import DateRangePicker from 'vue2-daterange-picker'
-//you need to import the CSS manually
 import 'vue2-daterange-picker/dist/vue2-daterange-picker.css'
 import moment from 'moment'
 import jsPDF from "jspdf";
 import "jspdf-autotable";
+import ReportChartPanel from "../../../../components/charts/ReportChartPanel.vue";
+import { pieChartOptions, barChartOptions } from "../../../../utils/chartTheme";
 
 export default {
   metaInfo: {
     title: "Top Selling Products"
   },
-  components: { DateRangePicker },
+  components: { DateRangePicker, ReportChartPanel },
   data() {
     return {
       isLoading: true,
+      echartProductsBar: {},
+      echartProductsPie: {},
       serverParams: {
         sort: {
           field: "id",
@@ -220,6 +239,26 @@ export default {
       }
     },
 
+    buildProductCharts() {
+      const top = this.products.slice(0, 8);
+      const names = top.map(p => p.name);
+      const totals = top.map(p => parseFloat(p.total) || 0);
+
+      this.echartProductsBar = barChartOptions({
+        categories: names,
+        series: [{ name: this.$t("TotalAmount"), data: totals }],
+        horizontal: true,
+      });
+
+      this.echartProductsPie = pieChartOptions({
+        title: this.$t("Top_Selling_Products"),
+        data: top.slice(0, 5).map(p => ({
+          name: p.name,
+          value: parseFloat(p.total) || 0,
+        })),
+      });
+    },
+
     //----------------------------- Get_top_products------------------\\
     Get_top_products(page) {
       // Start the progress bar.
@@ -243,6 +282,7 @@ export default {
         .then(response => {
           this.products = response.data.products;
           this.totalRows = response.data.totalRows;
+          this.buildProductCharts();
           // Complete the animation of theprogress bar.
           NProgress.done();
           this.isLoading = false;

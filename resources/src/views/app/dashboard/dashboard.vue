@@ -28,7 +28,7 @@
               <div class="content">
                 <p class="text-muted mt-2 mb-0">{{$t('Sales')}}</p>
                 <p
-                  class="text-primary text-24 line-height-1 mb-2"
+                  class="text-success text-24 line-height-1 mb-2"
                 >{{currentUser.currency}} {{report_today.today_sales?report_today.today_sales:0}}</p>
               </div>
             </b-card>
@@ -56,7 +56,7 @@
               <div class="content">
                 <p class="text-muted mt-2 mb-0">{{$t('SalesReturn')}}</p>
                 <p
-                  class="text-primary text-24 line-height-1 mb-2"
+                  class="text-warning text-24 line-height-1 mb-2"
                 >{{currentUser.currency}} {{report_today.return_sales?report_today.return_sales:0}}</p>
               </div>
             </b-card>
@@ -70,7 +70,7 @@
               <div class="content">
                 <p class="text-muted mt-2 mb-0">{{$t('PurchasesReturn')}}</p>
                 <p
-                  class="text-primary text-24 line-height-1 mb-2"
+                  class="text-info text-24 line-height-1 mb-2"
                 >{{currentUser.currency}} {{report_today.return_purchases?report_today.return_purchases:0}}</p>
               </div>
             </b-card>
@@ -226,6 +226,11 @@
 </template>
 <script>
 import { mapGetters } from "vuex";
+import {
+  CHART_COLORS,
+  pieChartOptions,
+  barChartOptions,
+} from "../../../utils/chartTheme";
 
 import ECharts from "vue-echarts/components/ECharts.vue";
 
@@ -421,210 +426,48 @@ export default {
             response.data.report_dashboard.original.stock_alert;
           this.products = response.data.report_dashboard.original.products;
           this.sales = response.data.report_dashboard.original.last_sales;
-          var dark_heading = "#c2c6dc";
+          this.echartCustomer = pieChartOptions({
+            title: "Top Customers",
+            data: responseData.customers.original,
+            formatter: params =>
+              `${params.name}: (${params.data.value} sales) (${params.percent}%)`,
+          });
 
-          this.echartCustomer = {
-            color: ["#6D28D9", "#8B5CF6", "#A78BFA", "#C4B5FD", "#7C3AED"],
-            tooltip: {
-              show: true,
-              backgroundColor: "rgba(0, 0, 0, .8)"
-            },
-
-            formatter: function(params) {
-              return `${params.name}: (${params.data.value} sales) (${
-                params.percent
-              }%)`;
-            },
-
-            series: [
-              {
-                name: "Top Customers",
-                type: "pie",
-                radius: "50%",
-                center: "50%",
-
-                data: responseData.customers.original,
-                itemStyle: {
-                  emphasis: {
-                    shadowBlur: 10,
-                    shadowOffsetX: 0,
-                    shadowColor: "rgba(0, 0, 0, 0.5)"
-                  }
-                }
-              }
-            ]
-          };
-          this.echartPayment = {
-            tooltip: {
-              trigger: "axis"
-            },
-            legend: {
-              data: ["Payment sent", "Payment received"]
-            },
-            grid: {
-              left: "3%",
-              right: "4%",
-              bottom: "3%",
-              containLabel: true
-            },
-            toolbox: {
-              feature: {
-                saveAsImage: {}
-              }
-            },
-            xAxis: {
-              type: "category",
-              boundaryGap: false,
-              data: responseData.payments.original.days
-            },
-            yAxis: {
-              type: "value"
-            },
+          this.echartPayment = lineChartOptions({
+            categories: responseData.payments.original.days,
             series: [
               {
                 name: "Payment sent",
-                type: "line",
-                data: responseData.payments.original.payment_sent
+                data: responseData.payments.original.payment_sent,
               },
               {
                 name: "Payment received",
-                type: "line",
-                data: responseData.payments.original.payment_received
-              }
-            ]
-          };
-          this.echartProduct = {
-            color: ["#6D28D9", "#8B5CF6", "#A78BFA", "#C4B5FD", "#7C3AED"],
-            tooltip: {
-              show: true,
-              backgroundColor: "rgba(0, 0, 0, .8)"
-            },
-            formatter: function(params) {
-              return `${params.name}: (${params.value}sales)`;
-            },
-            series: [
-              {
-                name: "Top Selling Products",
-                type: "pie",
-                radius: "50%",
-                center: "50%",
-
-                data: responseData.product_report.original,
-                itemStyle: {
-                  emphasis: {
-                    shadowBlur: 10,
-                    shadowOffsetX: 0,
-                    shadowColor: "rgba(0, 0, 0, 0.5)"
-                  }
-                }
-              }
-            ]
-          };
-          this.echartSales = {
-            legend: {
-              borderRadius: 0,
-              orient: "horizontal",
-              x: "right",
-              data: ["Sales", "Purchases"]
-            },
-            grid: {
-              left: "8px",
-              right: "8px",
-              bottom: "0",
-              containLabel: true
-            },
-            tooltip: {
-              show: true,
-
-              backgroundColor: "rgba(0, 0, 0, .8)"
-            },
-
-            xAxis: [
-              {
-                type: "category",
-                data: responseData.sales.original.days,
-                axisTick: {
-                  alignWithLabel: true
-                },
-                splitLine: {
-                  show: false
-                },
-                axisLabel: {
-                  color: dark_heading,
-                  interval: 0,
-                  rotate: 30
-                },
-                axisLine: {
-                  show: true,
-                  color: dark_heading,
-
-                  lineStyle: {
-                    color: dark_heading
-                  }
-                }
-              }
+                data: responseData.payments.original.payment_received,
+              },
             ],
-            yAxis: [
-              {
-                type: "value",
+          });
 
-                axisLabel: {
-                  color: dark_heading
-                  // formatter: "${value}"
-                },
-                axisLine: {
-                  show: false,
-                  color: dark_heading,
+          this.echartProduct = pieChartOptions({
+            title: "Top Selling Products",
+            data: responseData.product_report.original,
+            formatter: params => `${params.name}: (${params.value} sales)`,
+          });
 
-                  lineStyle: {
-                    color: dark_heading
-                  }
-                },
-                min: 0,
-                splitLine: {
-                  show: true,
-                  interval: "auto"
-                }
-              }
-            ],
-
+          this.echartSales = barChartOptions({
+            categories: responseData.sales.original.days,
             series: [
               {
                 name: "Sales",
                 data: responseData.sales.original.data,
-                label: { show: false, color: "#8B5CF6" },
-                type: "bar",
-                color: "#A78BFA",
-                smooth: true,
-                itemStyle: {
-                  emphasis: {
-                    shadowBlur: 10,
-                    shadowOffsetX: 0,
-                    shadowOffsetY: -2,
-                    shadowColor: "rgba(0, 0, 0, 0.3)"
-                  }
-                }
+                color: CHART_COLORS.green,
               },
               {
                 name: "Purchases",
                 data: responseData.purchases.original.data,
-
-                label: { show: false, color: "#0168c1" },
-                type: "bar",
-                barGap: 0,
-                color: "#DDD6FE",
-                smooth: true,
-                itemStyle: {
-                  emphasis: {
-                    shadowBlur: 10,
-                    shadowOffsetX: 0,
-                    shadowOffsetY: -2,
-                    shadowColor: "rgba(0, 0, 0, 0.3)"
-                  }
-                }
-              }
-            ]
-          };
+                color: CHART_COLORS.blue,
+              },
+            ],
+          });
           this.loading = false;
         })
         .catch(response => {});

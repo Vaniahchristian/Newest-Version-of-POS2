@@ -1,0 +1,76 @@
+/* Stocky bright palette: blue primary, green success, yellow warning */
+:root {
+  --primary: #3b82f6;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --info: #06b6d4;
+}
+
+.text-primary { color: #3b82f6 !important; }
+.text-success { color: #10b981 !important; }
+.text-warning { color: #f59e0b !important; }
+.text-info { color: #06b6d4 !important; }
+
+.btn-primary,
+.btn-primary:not(:disabled):not(.disabled):active {
+  background-color: #3b82f6 !important;
+  border-color: #3b82f6 !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: #2563eb !important;
+  border-color: #2563eb !important;
+}
+
+.btn-outline-primary {
+  color: #3b82f6 !important;
+  border-color: #3b82f6 !important;
+}
+
+.btn-outline-primary:hover {
+  background-color: #3b82f6 !important;
+  border-color: #3b82f6 !important;
+}
+
+.badge-outline-primary {
+  color: #3b82f6 !important;
+  border-color: #3b82f6 !important;
+}
+
+.badge-outline-success {
+  color: #10b981 !important;
+  border-color: #10b981 !important;
+}
+
+.badge-outline-warning {
+  color: #f59e0b !important;
+  border-color: #f59e0b !important;
+}
+
+.spinner-primary:before {
+  border-top-color: #3b82f6 !important;
+  border-left-color: #3b82f6 !important;
+}
+
+.card-icon [class^="i-"],
+.card-icon .lead {
+  color: #3b82f6 !important;
+}
+
+.card-icon-bg-primary [class^="i-"] {
+  color: rgba(59, 130, 246, 0.28) !important;
+}
+
+.layout-sidebar-large .navigation-left .nav-item.active .nav-item-hold,
+.layout-sidebar-large .navigation-left .nav-item .nav-item-hold:hover {
+  color: #3b82f6 !important;
+}
+
+.layout-sidebar-large .navigation-left .nav-item.active .triangle {
+  border-color: transparent transparent #3b82f6 transparent !important;
+}
+
+.chart-wrapper {
+  min-height: 260px;
+}

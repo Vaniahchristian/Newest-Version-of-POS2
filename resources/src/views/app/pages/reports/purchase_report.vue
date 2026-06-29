@@ -18,6 +18,22 @@
         </date-range-picker>
       </b-col>
 
+    <b-row v-if="!isLoading" class="mt-3">
+      <b-col lg="8" md="12">
+        <report-chart-panel
+          :title="$t('PurchasesReport')"
+          :subtitle="$t('Purchases') + ' by ' + $t('date')"
+          :options="echartPurchasesByDate"
+        />
+      </b-col>
+      <b-col lg="4" md="12">
+        <report-chart-panel
+          :title="$t('PaymentStatus')"
+          :options="echartPaymentStatus"
+        />
+      </b-col>
+    </b-row>
+
     <b-card class="wrapper" v-if="!isLoading">
       <vue-good-table
         mode="remote"
@@ -179,18 +195,21 @@ import NProgress from "nprogress";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import DateRangePicker from 'vue2-daterange-picker'
-//you need to import the CSS manually
 import 'vue2-daterange-picker/dist/vue2-daterange-picker.css'
 import moment from 'moment'
+import ReportChartPanel from "../../../../components/charts/ReportChartPanel.vue";
+import { pieChartOptions, barChartOptions } from "../../../../utils/chartTheme";
 
 export default {
   metaInfo: {
     title: "Report Purchases"
   },
-components: { DateRangePicker },
+components: { DateRangePicker, ReportChartPanel },
   data() {
     return {
       isLoading: true,
+      echartPurchasesByDate: {},
+      echartPaymentStatus: {},
       serverParams: {
         sort: {
           field: "id",
@@ -446,6 +465,35 @@ components: { DateRangePicker },
 
 
     //------------------------------------------------ Get Report Purchases -------------------------------\\
+    buildPurchaseCharts() {
+      const byDate = {};
+      const byPayment = { paid: 0, partial: 0, unpaid: 0 };
+
+      this.purchases.forEach(purchase => {
+        const date = purchase.date || "Unknown";
+        byDate[date] = (byDate[date] || 0) + (parseFloat(purchase.GrandTotal) || 0);
+        const status = purchase.payment_status || "unpaid";
+        if (byPayment[status] !== undefined) {
+          byPayment[status] += parseFloat(purchase.GrandTotal) || 0;
+        }
+      });
+
+      const dates = Object.keys(byDate).sort();
+      this.echartPurchasesByDate = barChartOptions({
+        categories: dates,
+        series: [{ name: this.$t("Total"), data: dates.map(d => byDate[d]) }],
+      });
+
+      this.echartPaymentStatus = pieChartOptions({
+        title: this.$t("PaymentStatus"),
+        data: [
+          { name: this.$t("Paid"), value: byPayment.paid },
+          { name: this.$t("partial"), value: byPayment.partial },
+          { name: this.$t("Unpaid"), value: byPayment.unpaid },
+        ].filter(d => d.value > 0),
+      });
+    },
+
     Get_Purchases(page) {
       // Start the progress bar.
       NProgress.start();
@@ -487,6 +535,7 @@ components: { DateRangePicker },
           this.warehouses = response.data.warehouses;
           this.totalRows = response.data.totalRows;
           this.rows[0].children = this.purchases;
+          this.buildPurchaseCharts();
           // Complete the animation of theprogress bar.
           NProgress.done();
           this.isLoading = false;

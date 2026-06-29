@@ -31,6 +31,20 @@
           </b-form-group>
       </b-col>
 
+      <b-col md="8" class="mt-4">
+        <report-chart-panel
+          :title="$t('ProfitandLoss')"
+          :subtitle="$t('Revenue') + ' vs ' + $t('Expenses')"
+          :options="echartBreakdown"
+        />
+      </b-col>
+      <b-col md="4" class="mt-4">
+        <report-chart-panel
+          :title="$t('Sales') + ' & ' + $t('Purchases')"
+          :options="echartComparison"
+        />
+      </b-col>
+
         <b-col md="12" class="mt-4">
           <b-row>
             <!-- /.Total Sales -->
@@ -43,7 +57,7 @@
                     {{$t('Sales')}}
                   </p>
                   <p
-                    class="text-primary text-24 line-height-1 m-0"
+                    class="text-success text-24 line-height-1 m-0"
                   >{{currentUser.currency}} {{infos.sales_sum}}</p>
                 </div>
               </div>
@@ -75,7 +89,7 @@
                     {{$t('SalesReturn')}}
                   </p>
                   <p
-                    class="text-primary text-24 line-height-1 m-0"
+                    class="text-warning text-24 line-height-1 m-0"
                   >{{currentUser.currency}} {{infos.returns_sales_sum}}</p>
                 </div>
               </div>
@@ -93,7 +107,7 @@
                     {{$t('PurchasesReturn')}}
                   </p>
                   <p
-                    class="text-primary text-24 line-height-1 m-0"
+                    class="text-info text-24 line-height-1 m-0"
                   >{{currentUser.currency}} {{infos.returns_purchases_sum}}</p>
                 </div>
               </div>
@@ -109,7 +123,7 @@
                     <span class="bold">{{$t('Expenses')}}</span>
                   </p>
                   <p
-                    class="text-primary text-24 line-height-1 m-0"
+                    class="text-danger text-24 line-height-1 m-0"
                   >{{currentUser.currency}} {{infos.expenses_sum}}</p>
                 </div>
               </div>
@@ -302,21 +316,24 @@
 import NProgress from "nprogress";
 import { mapActions, mapGetters } from "vuex";
 import DateRangePicker from 'vue2-daterange-picker'
-//you need to import the CSS manually
 import 'vue2-daterange-picker/dist/vue2-daterange-picker.css'
 import moment from 'moment'
+import ReportChartPanel from "../../../../components/charts/ReportChartPanel.vue";
+import { pieChartOptions, barChartOptions } from "../../../../utils/chartTheme";
 
 export default {
   metaInfo: {
     title: "Profit & Loss"
   },
-  components: { DateRangePicker },
+  components: { DateRangePicker, ReportChartPanel },
   data() {
     return {
       warehouses: [],
       warehouse_id: "",
       isLoading: true,
       infos: [],
+      echartBreakdown: {},
+      echartComparison: {},
       today_mode: true,
       startDate: "", 
       endDate: "", 
@@ -389,6 +406,41 @@ export default {
     },
 
     //----------------------------- Profit And Loss-------------------\\
+    buildProfitCharts() {
+      const i = this.infos;
+      const num = v => parseFloat(v) || 0;
+
+      this.echartBreakdown = pieChartOptions({
+        title: this.$t("ProfitandLoss"),
+        data: [
+          { name: this.$t("Sales"), value: num(i.sales_sum) },
+          { name: this.$t("SalesReturn"), value: num(i.returns_sales_sum) },
+          { name: this.$t("Purchases"), value: num(i.purchases_sum) },
+          { name: this.$t("Expenses"), value: num(i.expenses_sum) },
+        ].filter(d => d.value > 0),
+      });
+
+      this.echartComparison = barChartOptions({
+        categories: [
+          this.$t("Sales"),
+          this.$t("Purchases"),
+          this.$t("Revenue"),
+          "Profit FIFO",
+        ],
+        series: [
+          {
+            name: this.$t("Amount"),
+            data: [
+              num(i.sales_sum),
+              num(i.purchases_sum),
+              num(i.total_revenue),
+              num(i.profit_fifo),
+            ],
+          },
+        ],
+      });
+    },
+
     ProfitAndLoss() {
       // Start the progress bar.
       NProgress.start();
@@ -407,7 +459,7 @@ export default {
         .then(response => {
           this.infos = response.data.data;
           this.warehouses = response.data.warehouses;
-          
+          this.buildProfitCharts();
           // Complete the animation of theprogress bar.
           NProgress.done();
            this.isLoading = false;

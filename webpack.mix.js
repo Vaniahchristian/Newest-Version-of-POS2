@@ -1,5 +1,5 @@
 const mix = require('laravel-mix');
-
+const sass = require('sass');
 
 /*
  |--------------------------------------------------------------------------
@@ -32,3 +32,15 @@ mix.js('resources/src/main.js', 'public').js('resources/src/login.js', 'public')
               }),
         ]
     });
+
+mix.override((config) => {
+    config.module.rules.forEach((rule) => {
+        if (!rule.test || !rule.test.toString().includes('scss')) return;
+        const uses = rule.use || (rule.loader ? [{ loader: rule.loader, options: rule.options }] : []);
+        uses.forEach((entry) => {
+            if (entry && typeof entry === 'object' && entry.loader && entry.loader.includes('sass-loader')) {
+                entry.options = Object.assign({}, entry.options, { implementation: sass });
+            }
+        });
+    });
+});

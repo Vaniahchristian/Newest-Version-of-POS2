@@ -17,6 +17,22 @@
         </date-range-picker>
       </b-col>
 
+    <b-row v-if="!isLoading" class="mt-3">
+      <b-col lg="8" md="12">
+        <report-chart-panel
+          :title="$t('SalesReport')"
+          :subtitle="$t('Sales') + ' by ' + $t('date')"
+          :options="echartSalesByDate"
+        />
+      </b-col>
+      <b-col lg="4" md="12">
+        <report-chart-panel
+          :title="$t('PaymentStatus')"
+          :options="echartPaymentStatus"
+        />
+      </b-col>
+    </b-row>
+
     <b-card class="wrapper" v-if="!isLoading">
       <vue-good-table
         mode="remote"
@@ -174,15 +190,16 @@ import NProgress from "nprogress";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import DateRangePicker from 'vue2-daterange-picker'
-//you need to import the CSS manually
 import 'vue2-daterange-picker/dist/vue2-daterange-picker.css'
 import moment from 'moment'
+import ReportChartPanel from "../../../../components/charts/ReportChartPanel.vue";
+import { pieChartOptions, barChartOptions } from "../../../../utils/chartTheme";
 
 export default {
   metaInfo: {
     title: "Report Sales"
   },
-components: { DateRangePicker },
+components: { DateRangePicker, ReportChartPanel },
   data() {
     return {
      startDate: "", 
@@ -190,7 +207,9 @@ components: { DateRangePicker },
      dateRange: { 
        startDate: "", 
        endDate: "" 
-     }, 
+     },
+      echartSalesByDate: {},
+      echartPaymentStatus: {}, 
       locale:{ 
           //separator between the two ranges apply
           Label: "Apply", 
@@ -455,6 +474,35 @@ components: { DateRangePicker },
       }
     },
 
+    buildSalesCharts() {
+      const byDate = {};
+      const byPayment = { paid: 0, partial: 0, unpaid: 0 };
+
+      this.sales.forEach(sale => {
+        const date = sale.date || "Unknown";
+        byDate[date] = (byDate[date] || 0) + (parseFloat(sale.GrandTotal) || 0);
+        const status = sale.payment_status || "unpaid";
+        if (byPayment[status] !== undefined) {
+          byPayment[status] += parseFloat(sale.GrandTotal) || 0;
+        }
+      });
+
+      const dates = Object.keys(byDate).sort();
+      this.echartSalesByDate = barChartOptions({
+        categories: dates,
+        series: [{ name: this.$t("Total"), data: dates.map(d => byDate[d]) }],
+      });
+
+      this.echartPaymentStatus = pieChartOptions({
+        title: this.$t("PaymentStatus"),
+        data: [
+          { name: this.$t("Paid"), value: byPayment.paid },
+          { name: this.$t("partial"), value: byPayment.partial },
+          { name: this.$t("Unpaid"), value: byPayment.unpaid },
+        ].filter(d => d.value > 0),
+      });
+    },
+
     //----------------------------------------- Get all Sales ------------------------------\\
     Get_Sales(page) {
       // Start the progress bar.
@@ -495,6 +543,7 @@ components: { DateRangePicker },
           this.warehouses = response.data.warehouses;
           this.totalRows = response.data.totalRows;
           this.rows[0].children = this.sales;
+          this.buildSalesCharts();
 
           // Complete the animation of theprogress bar.
           NProgress.done();
