@@ -40,7 +40,7 @@ export default {
     Remove_Stripe_Key_Secret:'Delete Stripe API keys',
     credit_card_account_not_available :'Credit card account not available',
     Credit_Card_Info:'Credit Card Info',
-    developed_by:'Developed by',
+    developed_by:'developed by',
     Unit_already_linked_with_sub_unit:'Unit already linked with sub unit',
     Total_Items_Quantity : 'Total Items & Quantity',
     Value_by_Cost_and_Price : 'Value by Cost and Price',

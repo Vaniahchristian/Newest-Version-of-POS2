@@ -23,11 +23,11 @@ class SettingSeeder extends Seeder
                 'is_invoice_footer' => 0,
                 'invoice_footer' => Null,
                 'warehouse_id' => Null,
-                'CompanyName' => 'Stocky',
-                'CompanyPhone' => '6315996770',
-                'CompanyAdress' => '3618 Abia Martin Drive',
-                'footer' => 'Stocky - Ultimate Inventory With POS',
-                'developed_by' => 'Stocky',
+                'CompanyName' => 'Safari Intel',
+                'CompanyPhone' => '0754092850',
+                'CompanyAdress' => 'Makerere',
+                'footer' => 'YourPos - Ultimate Inventory With POS',
+                'developed_by' => 'christian',
                 'logo' => 'logo-default.png',
             )
             

@@ -16,6 +16,8 @@ if [ ! -f storage/oauth-private.key ]; then
   php artisan passport:keys --force
 fi
 
+php artisan migrate --force 2>/dev/null || true
+
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache 2>/dev/null || true
