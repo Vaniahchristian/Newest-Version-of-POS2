@@ -33,6 +33,13 @@
       </div>
 
       <script src="/js/login.min.js?v=4.0.6"></script>
+      <script>
+        // Hide splash if router chunk load fails (e.g. missing webpack bundles)
+        setTimeout(function () {
+          var el = document.getElementById('loading_wrap');
+          if (el) el.style.display = 'none';
+        }, 1500);
+      </script>
   </body>
 </html>
 
